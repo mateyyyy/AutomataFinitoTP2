@@ -22,4 +22,8 @@ public class Transicion {
     public char getCaracter() {
         return caracter;
     }
+
+    public void printTransition(){
+        System.out.println(estadoInicial + "--(" + caracter + ")-->" + estadoFinal);
+    }
 }
