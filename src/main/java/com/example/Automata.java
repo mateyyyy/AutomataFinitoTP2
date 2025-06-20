@@ -255,7 +255,7 @@ public class Automata {
     return -1;
 }
 
-    public ArrayList<Integer> clausuraLambda(ArrayList<Integer> estadosIniciales, ArrayList<Integer> lista){ //Retorna conj. de estados alcanzables con lambda comenzando en un unico estado
+    public ArrayList<Integer> clausuraLambda(ArrayList<Integer> estadosIniciales, ArrayList<Integer> lista){
     for (int j=0; j<estadosIniciales.size(); j++){
         for(int i=0; i<transiciones.length; i++){
             if(transiciones[i].getEstadoInicial() == estadosIniciales.get(j) && transiciones[i].getCaracter() == '-'){

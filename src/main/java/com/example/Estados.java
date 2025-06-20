@@ -31,18 +31,4 @@ public class Estados {
     public int getId(){
         return id;
     }
-
-    public boolean esIgual(ArrayList<Integer> otro) {
-        if (otro.size() != conjuntos.size()) return false;
-        for (int i : conjuntos) {
-            if (!otro.contains(i)) return false;
-        }
-        for (int i : otro) {
-            if (!conjuntos.contains(i)) return false;
-        }
-        return true;
-    }
-
-
-    
 }
