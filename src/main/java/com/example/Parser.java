@@ -1,5 +1,7 @@
 package com.example;
 
+import java.util.ArrayList;
+
 public class Parser {
     public int i = 0;
     public String token;
@@ -20,12 +22,11 @@ public class Parser {
         if (token.charAt(i) == '(' || token.charAt(i) == 'a' || token.charAt(i) == 'b' || token.charAt(i) == 'c') {
             Automata t = T();
             Automata e = Eprima();
-            if(e != null){
+            if (e != null) {
                 int estadoInicial = generarNuevoEstado();
                 int estadoFinal = generarNuevoEstado();
                 return automataOP.union(t, e, estadoInicial, estadoFinal);
-            }
-            else{
+            } else {
                 return t;
             }
         } else {
@@ -41,12 +42,11 @@ public class Parser {
             eat();
             Automata t = T();
             Automata e = Eprima();
-            if(e!=null){ //Entonces empieza con el |, tenemos que hacer la union
+            if (e != null) { // Entonces empieza con el |, tenemos que hacer la union
                 int estadoInicial = generarNuevoEstado();
                 int estadoFinal = generarNuevoEstado();
                 return automataOP.union(t, e, estadoInicial, estadoFinal);
-            }
-            else{
+            } else {
                 return t;
             }
         } else if (token.charAt(i) == ')' || token.charAt(i) == '#') {
@@ -63,10 +63,9 @@ public class Parser {
         if (token.charAt(i) == '(' || token.charAt(i) == 'a' || token.charAt(i) == 'b' || token.charAt(i) == 'c') {
             Automata f = F();
             Automata t = Tprima();
-            if(t!=null){
+            if (t != null) {
                 return automataOP.concatenar(f, t);
-            }
-            else{
+            } else {
                 return f;
             }
 
@@ -83,13 +82,11 @@ public class Parser {
             eat();
             Automata f = F();
             Automata t = Tprima();
-            if(t == null){
+            if (t == null) {
                 return f;
-            }
-            else{
+            } else {
                 return automataOP.concatenar(f, t);
             }
-            
 
         } else if (token.charAt(i) == '|' || token.charAt(i) == ')' || token.charAt(i) == '#') {
             // lambda (no se hace nada)
@@ -104,12 +101,11 @@ public class Parser {
         // F -> P F'
         if (token.charAt(i) == '(' || token.charAt(i) == 'a' || token.charAt(i) == 'b' || token.charAt(i) == 'c') {
             Automata p = P();
-            if(Fprima()){
+            if (Fprima()) {
                 int estadoInicial = generarNuevoEstado();
                 int estadoFinal = generarNuevoEstado();
                 return automataOP.clausuraKleene(p, estadoInicial, estadoFinal);
-            }
-            else{
+            } else {
                 return p;
             }
         } else {
@@ -124,9 +120,10 @@ public class Parser {
         if (token.charAt(i) == '*') {
             eat();
             return true;
-        } else if (token.charAt(i) == '.' || token.charAt(i) == '|' || token.charAt(i) == ')' || token.charAt(i) == '#') {
+        } else if (token.charAt(i) == '.' || token.charAt(i) == '|' || token.charAt(i) == ')'
+                || token.charAt(i) == '#') {
             // lambda (no se hace nada)
-            
+
         } else {
             System.out.println("Syntax error en F'\n");
             System.exit(1);
@@ -158,13 +155,15 @@ public class Parser {
     Automata L() {
         // L -> a | b | c
         if (token.charAt(i) == 'a' || token.charAt(i) == 'b' || token.charAt(i) == 'c') {
-            
+
             char simbolo = token.charAt(i); // guarda el caracter antes de consumirlo
             eat();
             int originState = generarNuevoEstado();
-            int destinyState = generarNuevoEstado();
-            Transicion transicion = new Transicion(originState, simbolo, destinyState);
-            return new Automata(originState, new int[] { destinyState }, new Transicion[] {transicion});
+            ArrayList<Integer> destinyState = new ArrayList<>();
+            destinyState.add(generarNuevoEstado());
+            ArrayList<Transicion> transicion = new ArrayList<>();
+            transicion.add(new Transicion(originState, simbolo, destinyState.get(0)));
+            return new Automata(originState, destinyState, transicion);
         } else {
             System.out.println("Syntax error en L\n");
             System.exit(1);
@@ -174,19 +173,21 @@ public class Parser {
 
     public int generarNuevoEstado() {
         lastState++;
-        return lastState-1;
-        
+        return lastState - 1;
+
     }
 
-    public void validateString(){
-        Automata e = E(); 
+    public void validateString() {
+        Automata e = E();
         if (token.charAt(i) == '#') {
-        System.out.println("Cadena válida\n");
-        e.imprimirAutomata();
-        e.AfnToAfd();
-        e.validarCadena("ababab#");
-    } else {
-        System.out.println("Cadena inválida. Sobra algo: \n" + token.charAt(i));
-    }
+            System.out.println("Cadena válida\n");
+            e.imprimirAutomata();
+            AFNtoAFDConverter converter = new AFNtoAFDConverter();
+            Automata eAFD = converter.AfnToAfd(e);
+            eAFD.validarCadena("ababab#");
+            eAFD.imprimirAutomata();
+        } else {
+            System.out.println("Cadena inválida. Sobra algo: \n" + token.charAt(i));
+        }
     }
 }

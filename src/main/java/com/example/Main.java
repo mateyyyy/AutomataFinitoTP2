@@ -96,7 +96,7 @@ public class Main {
         // unionAB.estadoActual = unionAB.estadoInicial;
         // unionAB.validarCadenaAFND("c#"); // inválida
 
-        Parser parser = new Parser("(a.b)*|(b.a)#");
+        Parser parser = new Parser("(a.b)*#");
         parser.validateString();
 
     }

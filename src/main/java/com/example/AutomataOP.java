@@ -6,62 +6,64 @@ public class AutomataOP {
 
     // Concatenación de dos autómatas: a · b
     public Automata concatenar(Automata a, Automata b) {
-        Transicion[] transicionesIntermedias = new Transicion[a.estadoFinal.length];
-        for (int i = 0; i < a.estadoFinal.length; i++) {
-        transicionesIntermedias[i] = new Transicion(a.estadoFinal[i], '-', b.estadoInicial);
+        ArrayList<Transicion> transicionesIntermedias = new ArrayList<>();
+        for (int i = 0; i < a.estadoFinal.size(); i++) {
+            transicionesIntermedias.add(new Transicion(a.estadoFinal.get(i), '-', b.estadoInicial));
         }
 
-        Transicion[] nuevasTransiciones = concatenarArreglos(a.transiciones, b.transiciones, transicionesIntermedias);
+        ArrayList<Transicion> nuevasTransiciones = new ArrayList<>();
+        nuevasTransiciones.addAll(a.transiciones);
+        nuevasTransiciones.addAll(b.transiciones);
+        nuevasTransiciones.addAll(transicionesIntermedias);
         return new Automata(a.estadoInicial, b.estadoFinal, nuevasTransiciones);
     }
 
     // Unión de dos autómatas: a | b
     public Automata union(Automata a, Automata b, int estadoInicial, int estadoFinal ) {
         int nuevoEstadoInicial = estadoInicial;
-        int nuevoEstadoFinal = estadoFinal;
-
+        ArrayList<Integer> nuevoEstadoFinal = new ArrayList<>();
+        nuevoEstadoFinal.add(estadoFinal);
         ArrayList<Transicion> transiciones = new ArrayList<>();
         transiciones.add(new Transicion(nuevoEstadoInicial, '-', a.estadoInicial));
         transiciones.add(new Transicion(nuevoEstadoInicial, '-', b.estadoInicial));
 
         for (int f : a.estadoFinal) {
-            transiciones.add(new Transicion(f, '-', nuevoEstadoFinal));
+            transiciones.add(new Transicion(f, '-', nuevoEstadoFinal.get(0)));
         }
 
         for (int f : b.estadoFinal) {
-            transiciones.add(new Transicion(f, '-', nuevoEstadoFinal));
+            transiciones.add(new Transicion(f, '-', nuevoEstadoFinal.get(0)));
         }
 
         // Combinar transiciones existentes con las nuevas
-        Transicion[] todas = concatenarArreglos(
-            a.transiciones,
-            b.transiciones,
-            transiciones.toArray(new Transicion[0])
-        );
+        
+        ArrayList<Transicion> nuevasTraciciones = new ArrayList<>();
+        nuevasTraciciones.addAll(a.transiciones);
+        nuevasTraciciones.addAll(b.transiciones);
+        nuevasTraciciones.addAll(transiciones);
 
-        return new Automata(nuevoEstadoInicial, new int[]{nuevoEstadoFinal}, todas);
+        return new Automata(nuevoEstadoInicial, nuevoEstadoFinal, nuevasTraciciones);
     }
 
     // Clausura de Kleene: a*
     public Automata clausuraKleene(Automata a, int estadoInicial, int estadoFinal) {
         int nuevoEstadoInicial = estadoInicial;
-        int nuevoEstadoFinal = estadoFinal;
-
+        ArrayList<Integer> nuevoEstadoFinal = new ArrayList<>();
+        nuevoEstadoFinal.add(estadoFinal);
         ArrayList<Transicion> transiciones = new ArrayList<>();
         transiciones.add(new Transicion(nuevoEstadoInicial, '-', a.estadoInicial)); // λ → A
-        transiciones.add(new Transicion(nuevoEstadoInicial, '-', nuevoEstadoFinal)); // λ → final directo
+        transiciones.add(new Transicion(nuevoEstadoInicial, '-', nuevoEstadoFinal.get(0))); // λ → final directo
 
         for (int f : a.estadoFinal) {
             transiciones.add(new Transicion(f, '-', a.estadoInicial)); // ciclo
-            transiciones.add(new Transicion(f, '-', nuevoEstadoFinal)); // salida
+            transiciones.add(new Transicion(f, '-', nuevoEstadoFinal.get(0))); // salida
         }
 
-        Transicion[] todas = concatenarArreglos(
-            a.transiciones,
-            transiciones.toArray(new Transicion[0])
-        );
+        ArrayList<Transicion> nuevasTraciciones = new ArrayList<>();
+        nuevasTraciciones.addAll(a.transiciones);
+        nuevasTraciciones.addAll(transiciones);
 
-        return new Automata(nuevoEstadoInicial, new int[]{nuevoEstadoFinal}, todas);
+        return new Automata(nuevoEstadoInicial, nuevoEstadoFinal, nuevasTraciciones);
     }
 
     // Concatenar varios arreglos de transiciones
