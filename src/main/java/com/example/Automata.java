@@ -1,6 +1,12 @@
 package com.example;
 
+import java.io.BufferedReader;
+import java.io.FileReader;
+import java.io.IOException;
+import java.io.PrintWriter;
 import java.util.ArrayList;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 public class Automata {
     int estadoInicial;
@@ -17,6 +23,38 @@ public class Automata {
         this.estadoActual = estadoInicial;
     }
 
+    public Automata(String archivoDot) {
+        Pattern patronEstadoInicial = Pattern.compile("inic\\s*->\\s*(\\d+)\\s*;");
+        Pattern patronTransicion = Pattern.compile("(\\d+)\\s*->\\s*(\\d+)\\s*\\[label=\"(.)\"\\]\\s*;");
+        Pattern patronEstadoFinal = Pattern.compile("(\\d+)\\s*\\[shape=doublecircle\\]\\s*;");
+
+        try (BufferedReader br = new BufferedReader(new FileReader(archivoDot))) {
+            String linea;
+            while ((linea = br.readLine()) != null) {
+                Matcher mIni = patronEstadoInicial.matcher(linea);
+                if (mIni.find()) {
+                    estadoInicial = Integer.parseInt(mIni.group(1));
+                    estadoActual = estadoInicial; // también inicializo estadoActual
+                }
+
+                Matcher mTran = patronTransicion.matcher(linea);
+                if (mTran.find()) {
+                    int origen = Integer.parseInt(mTran.group(1));
+                    int destino = Integer.parseInt(mTran.group(2));
+                    char simbolo = mTran.group(3).charAt(0);
+                    transiciones.add(new Transicion(origen, simbolo, destino));
+                }
+
+                Matcher mFinal = patronEstadoFinal.matcher(linea);
+                if (mFinal.find()) {
+                    estadoFinal.add(Integer.parseInt(mFinal.group(1)));
+                }
+            }
+        } catch (IOException e) {
+            // Si no vas a manejar errores, simplemente dejalo vacío o logueá si querés
+        }
+    }
+
     public void validarCadena(String cadena) {
         pos = 0;
         estadoActual = estadoInicial;
@@ -24,58 +62,12 @@ public class Automata {
             estadoActual = transicion(estadoActual, cadena.charAt(pos));
             pos++;
         }
-        cadena = cadena.substring(0, cadena.length() - 1);
 
         if (esEstadoFinal(estadoActual)) {
-            System.out.println("Cadena válida : " + cadena);
+            System.out.println("Cadena válida : " + cadena.substring(0, cadena.length() - 1));
         } else {
             System.out.println("Syntax error");
         }
-    }
-
-    public void validarCadenaAFND(String cadena) {
-        boolean aceptada = procesarAFND(estadoInicial, cadena, 0);
-        if (aceptada) {
-            System.out.println("Cadena válida");
-        } else {
-            System.out.println("Syntax error");
-        }
-    }
-
-    private boolean procesarAFND(int estado, String cadena, int pos) {
-        // Caso base: cadena terminada
-        if (pos >= cadena.length() || cadena.charAt(pos) == '#') {
-            if (esEstadoFinal(estado))
-                return true;
-            // aún puede haber caminos con transiciones λ
-            for (Transicion t : transiciones) {
-                if (t.getEstadoInicial() == estado && t.getCaracter() == 'λ') {
-                    if (procesarAFND(t.getEstadoFinal(), cadena, pos))
-                        return true;
-                }
-            }
-            return false;
-        }
-
-        char simbolo = cadena.charAt(pos);
-        boolean aceptado = false;
-
-        // Primero seguir transiciones por el símbolo actual
-        for (Transicion t : transiciones) {
-            if (t.getEstadoInicial() == estado && t.getCaracter() == simbolo) {
-                if (procesarAFND(t.getEstadoFinal(), cadena, pos + 1))
-                    return true;
-            }
-        }
-
-        for (Transicion t : transiciones) {
-            if (t.getEstadoInicial() == estado && t.getCaracter() == 'λ') {
-                if (procesarAFND(t.getEstadoFinal(), cadena, pos))
-                    return true;
-            }
-        }
-
-        return false;
     }
 
     private boolean esEstadoFinal(int estado) {
@@ -123,6 +115,28 @@ public class Automata {
         }
 
         System.out.println();
+    }
+
+    public void exportarDot(String nombreArchivo) {
+        try (PrintWriter writer = new PrintWriter(nombreArchivo)) {
+            writer.println("digraph AFN {");
+            writer.println("    rankdir=LR;");
+            writer.println("    inic [shape=point];");
+            writer.println("    inic -> " + estadoInicial + ";");
+
+            for (int f : estadoFinal) {
+                writer.println("    " + f + " [shape=doublecircle];");
+            }
+
+            for (Transicion t : transiciones) {
+                writer.println("    " + t.getEstadoInicial() + " -> " + t.getEstadoFinal() +
+                        " [label=\"" + t.getCaracter() + "\"];");
+            }
+
+            writer.println("}");
+        } catch (IOException e) {
+            System.out.println("Error al generar .dot: " + e.getMessage());
+        }
     }
 
     public ArrayList<Integer> Mover(int estado, char caracter) {

@@ -9,7 +9,7 @@ public class Parser {
     AutomataOP automataOP = new AutomataOP();
 
     public Parser(String token) {
-        this.token = token;
+        this.token = token + '#';
     }
 
     public void eat() {
@@ -182,7 +182,6 @@ public class Parser {
         if (token.charAt(i) == '#') {
             System.out.println("Expresion Regular válida");
             AFNtoAFDConverter converter = new AFNtoAFDConverter();
-            Automata eAFD = converter.AfnToAfd(e);
             return e;
         } else {
             System.out.println("Cadena inválida. Sobra algo: \n" + token.charAt(i));
