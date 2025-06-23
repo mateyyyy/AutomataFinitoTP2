@@ -56,6 +56,7 @@ public class Automata {
     }
 
     public void validarCadena(String cadena) {
+        cadena = cadena + "#";
         pos = 0;
         estadoActual = estadoInicial;
         while (cadena.charAt(pos) != '#') {
