@@ -177,17 +177,15 @@ public class Parser {
 
     }
 
-    public void validateString() {
+    public Automata generarAutomata() {
         Automata e = E();
         if (token.charAt(i) == '#') {
-            System.out.println("Cadena válida\n");
-            e.imprimirAutomata();
             AFNtoAFDConverter converter = new AFNtoAFDConverter();
             Automata eAFD = converter.AfnToAfd(e);
-            eAFD.validarCadena("ababab#");
-            eAFD.imprimirAutomata();
+            return e;
         } else {
             System.out.println("Cadena inválida. Sobra algo: \n" + token.charAt(i));
         }
+        return null;
     }
 }
