@@ -180,6 +180,7 @@ public class Parser {
     public Automata generarAutomata() {
         Automata e = E();
         if (token.charAt(i) == '#') {
+            System.out.println("Expresion Regular válida");
             AFNtoAFDConverter converter = new AFNtoAFDConverter();
             Automata eAFD = converter.AfnToAfd(e);
             return e;

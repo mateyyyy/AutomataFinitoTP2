@@ -24,9 +24,10 @@ public class Automata {
             estadoActual = transicion(estadoActual, cadena.charAt(pos));
             pos++;
         }
+        cadena = cadena.substring(0, cadena.length() - 1);
 
         if (esEstadoFinal(estadoActual)) {
-            System.out.println("Cadena válida");
+            System.out.println("Cadena válida : " + cadena);
         } else {
             System.out.println("Syntax error");
         }
@@ -98,27 +99,30 @@ public class Automata {
     }
 
     public void imprimirAutomata() {
-        System.out.println("\n\nAutomata");
-        System.out.println("Estado inicial : " + estadoInicial);
-        System.out.print("Estado/s finales : ");
-        for (int i = 0; i < estadoFinal.size(); i++) {
-            if (estadoFinal.size() > 1) {
-                if (i < estadoFinal.size() - 1) {
-                    System.out.print(estadoFinal.get(i) + ", ");
-                } else {
-                    System.out.print(estadoFinal.get(i));
+        System.out.println("\n===========================");
+        System.out.println("      AUTÓMATA FINITO");
+        System.out.println("===========================\n");
 
-                }
-            } else {
-                System.out.print(estadoFinal.get(i));
+        System.out.println(" Estado inicial: q" + estadoInicial);
 
+        System.out.print(" Estados finales: ");
+        if (estadoFinal.isEmpty()) {
+            System.out.println("ninguno");
+        } else {
+            for (int i = 0; i < estadoFinal.size(); i++) {
+                System.out.print("q" + estadoFinal.get(i));
+                if (i < estadoFinal.size() - 1)
+                    System.out.print(", ");
             }
-        }
-        System.out.println("");
-        for (int i = 0; i < transiciones.size(); i++) {
-            transiciones.get(i).printTransition();
+            System.out.println();
         }
 
+        System.out.println("\n Transiciones:");
+        for (Transicion t : transiciones) {
+            t.printTransition(); // Asegurate de que esto imprima con buen formato
+        }
+
+        System.out.println();
     }
 
     public ArrayList<Integer> Mover(int estado, char caracter) {
